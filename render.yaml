@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: sk-shopkeep
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn backend.app:create_app()
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
