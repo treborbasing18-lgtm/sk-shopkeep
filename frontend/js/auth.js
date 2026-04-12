@@ -2,6 +2,7 @@ class AuthManager {
   constructor() {
     this.user = null;
     this.isAuthenticated = false;
+    this.isAdmin = false;
   }
 
   async checkAuth() {
@@ -9,10 +10,12 @@ class AuthManager {
       const data = await ApiService.getCurrentUser();
       this.user = data.user;
       this.isAuthenticated = true;
+      this.isAdmin = this.user.role === 'admin';
       return true;
     } catch {
       this.user = null;
       this.isAuthenticated = false;
+      this.isAdmin = false;
       return false;
     }
   }
@@ -21,6 +24,7 @@ class AuthManager {
     const data = await ApiService.login(username, password);
     this.user = data.user;
     this.isAuthenticated = true;
+    this.isAdmin = this.user.role === 'admin';
     return data;
   }
 
@@ -34,6 +38,7 @@ class AuthManager {
     const data = await ApiService.setup(username, password);
     this.user = data.user;
     this.isAuthenticated = true;
+    this.isAdmin = this.user.role === 'admin';
     return data;
   }
 }
