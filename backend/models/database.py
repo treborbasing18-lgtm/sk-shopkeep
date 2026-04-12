@@ -1,6 +1,6 @@
 import sqlite3
 from contextlib import contextmanager
-from config import Config
+from backend.config import Config
 
 class Database:
 
