@@ -1,6 +1,5 @@
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, session
 from flask_cors import CORS
-from flask_session import Session
 import os
 import sqlite3
 
@@ -21,7 +20,6 @@ def create_app(test_config=None):
         app.config.from_object(Config)
     
     CORS(app, origins=Config.CORS_ORIGINS, supports_credentials=True)
-    Session(app)
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(product_bp)
@@ -45,13 +43,17 @@ def create_app(test_config=None):
 def init_database():
     db_path = Config.DATABASE_PATH
     schema_path = os.path.join(os.path.dirname(__file__), '..', 'database', 'schema.sql')
-    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    
+    db_dir = os.path.dirname(db_path)
+    if db_dir and not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
     
     if not os.path.exists(db_path):
         conn = sqlite3.connect(db_path)
         with open(schema_path, 'r') as f:
             conn.executescript(f.read())
         conn.close()
+        print(f"Database created at: {db_path}")
 
 if __name__ == '__main__':
     app = create_app()
