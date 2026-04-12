@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
-from models.sales_model import SalesModel
-from models.log_model import LogModel
-from auth.auth_service import AuthService
+from backend.models.sales_model import SalesModel
+from backend.models.log_model import LogModel
+from backend.auth.auth_service import AuthService
+from backend.utils.validators import Validators
 
 sales_bp = Blueprint('sales', __name__, url_prefix='/api/sales')
 

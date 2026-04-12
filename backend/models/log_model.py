@@ -1,5 +1,5 @@
 import uuid
-from models.database import db
+from backend.models.database import db
 
 class LogModel:
 

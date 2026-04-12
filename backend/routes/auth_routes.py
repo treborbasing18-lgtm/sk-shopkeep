@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
-from models.user_model import UserModel
-from models.log_model import LogModel
-from auth.auth_service import AuthService
+from backend.models.user_model import UserModel
+from backend.models.log_model import LogModel
+from backend.auth.auth_service import AuthService
+from backend.utils.validators import Validators
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -31,7 +32,7 @@ def get_current_user():
 
 @auth_bp.route('/setup', methods=['POST'])
 def setup_first_user():
-    from models.database import db
+    from backend.models.database import db
     result = db.execute_query("SELECT COUNT(*) as count FROM users")
     if result and result[0]['count'] > 0:
         return jsonify({'error': 'Setup already completed'}), 403
@@ -48,7 +49,7 @@ def setup_first_user():
 
 @auth_bp.route('/check-first-run', methods=['GET'])
 def check_first_run():
-    from models.database import db
+    from backend.models.database import db
     result = db.execute_query("SELECT COUNT(*) as count FROM users")
     has_users = result and result[0]['count'] > 0
     return jsonify({'needs_setup': not has_users})

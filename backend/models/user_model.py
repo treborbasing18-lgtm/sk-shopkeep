@@ -1,6 +1,6 @@
 import uuid
 import bcrypt
-from models.database import db
+from backend.models.database import db
 
 class UserModel:
 

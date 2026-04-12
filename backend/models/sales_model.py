@@ -1,6 +1,6 @@
 import uuid
-from models.database import db
-from models.product_model import ProductModel
+from backend.models.database import db
+from backend.models.product_model import ProductModel
 
 class SalesModel:
 
