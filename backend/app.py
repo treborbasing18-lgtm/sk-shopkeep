@@ -28,6 +28,35 @@ def create_app(test_config=None):
     app.register_blueprint(log_bp)
     app.register_blueprint(report_bp)
     
+    @app.route('/api/auth/setup/status', methods=['GET'])
+    def setup_status():
+        from backend.models.database import db
+        result = db.execute_query("SELECT COUNT(*) as count FROM users WHERE role = 'admin'")
+        has_admin = result and result[0]['count'] > 0
+        return {'needs_setup': not has_admin}
+    
+    @app.route('/api/auth/setup', methods=['POST'])
+    def setup_admin_direct():
+        from flask import request, jsonify
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
+        
+        from backend.models.database import db
+        result = db.execute_query("SELECT COUNT(*) as count FROM users WHERE role = 'admin'")
+        if result and result[0]['count'] > 0:
+            return jsonify({'error': 'Admin already exists'}), 403
+        
+        try:
+            from backend.models.user_model import UserModel
+            user_id = UserModel.create(username, password, 'admin')
+            user = UserModel.authenticate(username, password)
+            from backend.auth.auth_service import AuthService
+            AuthService.login_user(user)
+            return jsonify({'success': True, 'user': {'id': user['id'], 'username': user['username'], 'role': user['role']}})
+        except ValueError as e:
+            return jsonify({'error': str(e)}), 400
+    
     init_database()
     
     @app.route('/')
