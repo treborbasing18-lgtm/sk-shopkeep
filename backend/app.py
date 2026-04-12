@@ -12,9 +12,13 @@ from backend.routes.user_routes import user_bp
 from backend.routes.log_routes import log_bp
 from backend.routes.report_routes import report_bp
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__, static_folder='../frontend', static_url_path='')
-    app.config.from_object(Config)
+    
+    if test_config:
+        app.config.update(test_config)
+    else:
+        app.config.from_object(Config)
     
     CORS(app, origins=Config.CORS_ORIGINS, supports_credentials=True)
     Session(app)
