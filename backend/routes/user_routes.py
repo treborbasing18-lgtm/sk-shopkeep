@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify 
-from auth.auth_service import AuthService 
+from backend.auth.auth_service import AuthService 
  
 user_bp = Blueprint('users', __name__, url_prefix='/api/users') 
  
