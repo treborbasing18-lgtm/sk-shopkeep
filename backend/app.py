@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, session
+from flask import Flask, send_from_directory, session, jsonify
 from flask_cors import CORS
 import os
 import sqlite3
@@ -21,6 +21,7 @@ def create_app(test_config=None):
     
     CORS(app, origins=Config.CORS_ORIGINS, supports_credentials=True)
     
+    # Register blueprints FIRST
     app.register_blueprint(auth_bp)
     app.register_blueprint(product_bp)
     app.register_blueprint(sales_bp)
@@ -28,12 +29,17 @@ def create_app(test_config=None):
     app.register_blueprint(log_bp)
     app.register_blueprint(report_bp)
     
+    # Direct API routes
+    @app.route('/api/health')
+    def health_check():
+        return jsonify({'status': 'ok'})
+    
     @app.route('/api/auth/setup/status', methods=['GET'])
     def setup_status():
         from backend.models.database import db
         result = db.execute_query("SELECT COUNT(*) as count FROM users WHERE role = 'admin'")
         has_admin = result and result[0]['count'] > 0
-        return {'needs_setup': not has_admin}
+        return jsonify({'needs_setup': not has_admin})
     
     @app.route('/api/auth/setup', methods=['POST'])
     def setup_admin_direct():
@@ -59,13 +65,13 @@ def create_app(test_config=None):
     
     init_database()
     
-    @app.route('/')
-    def serve_frontend():
+    # Static file route LAST
+    @app.route('/', defaults={'path': ''})
+    @app.route('/<path:path>')
+    def serve_frontend(path):
+        if path and path.startswith('api/'):
+            return jsonify({'error': 'API endpoint not found'}), 404
         return send_from_directory(app.static_folder, 'index.html')
-    
-    @app.route('/api/health')
-    def health_check():
-        return {'status': 'ok'}
     
     return app
 
