@@ -52,42 +52,67 @@ def create_app(test_config=None):
     def setup_admin_direct():
         from flask import jsonify, request
         import sqlite3
+        import traceback
+        import os
         
-        data = request.get_json()
-        username = data.get('username', '').strip()
-        password = data.get('password', '')
-        
-        if not username or len(username) < 3:
-            return jsonify({'error': 'Username must be at least 3 characters'}), 400
-        if not password or len(password) < 6:
-            return jsonify({'error': 'Password must be at least 6 characters'}), 400
-        
-        # Check if admin exists
-        db_path = '/tmp/shopkeep.db'
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'admin'")
-        if cursor.fetchone()[0] > 0:
+        try:
+            print("=== SETUP ATTEMPT ===")
+            data = request.get_json()
+            print(f"Received data: {data}")
+            
+            username = data.get('username', '').strip()
+            password = data.get('password', '')
+            
+            if not username or len(username) < 3:
+                return jsonify({'error': 'Username must be at least 3 characters'}), 400
+            if not password or len(password) < 6:
+                return jsonify({'error': 'Password must be at least 6 characters'}), 400
+            
+            db_path = '/tmp/shopkeep.db'
+            print(f"Database path: {db_path}")
+            print(f"Database exists: {os.path.exists(db_path)}")
+            
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            
+            # Check if users table exists
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+            if not cursor.fetchone():
+                print("Users table doesn't exist, creating schema...")
+                schema_path = os.path.join(os.path.dirname(__file__), '..', 'database', 'schema.sql')
+                print(f"Schema path: {schema_path}")
+                with open(schema_path, 'r') as f:
+                    conn.executescript(f.read())
+                print("Schema created")
+            
+            # Check if admin exists
+            cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'admin'")
+            if cursor.fetchone()[0] > 0:
+                conn.close()
+                return jsonify({'error': 'Admin already exists'}), 403
+            
+            # Create admin
+            import uuid
+            import bcrypt
+            user_id = str(uuid.uuid4())
+            password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            
+            cursor.execute(
+                "INSERT INTO users (id, username, password_hash, role, created_at) VALUES (?, ?, ?, ?, datetime('now'))",
+                (user_id, username, password_hash, 'admin')
+            )
+            conn.commit()
             conn.close()
-            return jsonify({'error': 'Admin already exists'}), 403
-        
-        # Create admin
-        import uuid
-        import bcrypt
-        user_id = str(uuid.uuid4())
-        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        
-        cursor.execute(
-            "INSERT INTO users (id, username, password_hash, role, created_at) VALUES (?, ?, ?, ?, datetime('now'))",
-            (user_id, username, password_hash, 'admin')
-        )
-        conn.commit()
-        conn.close()
-        
-        from backend.auth.auth_service import AuthService
-        AuthService.login_user({'id': user_id, 'username': username, 'role': 'admin'})
-        
-        return jsonify({'success': True, 'user': {'id': user_id, 'username': username, 'role': 'admin'}})
+            print(f"Admin created: {username}")
+            
+            from backend.auth.auth_service import AuthService
+            AuthService.login_user({'id': user_id, 'username': username, 'role': 'admin'})
+            
+            return jsonify({'success': True, 'user': {'id': user_id, 'username': username, 'role': 'admin'}})
+            
+        except Exception as e:
+            print(f"SETUP ERROR: {traceback.format_exc()}")
+            return jsonify({'error': str(e)}), 500
     
     @app.route('/api/auth/login', methods=['POST'])
     def login_direct():
