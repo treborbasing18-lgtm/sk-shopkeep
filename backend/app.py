@@ -91,31 +91,41 @@ def create_app(test_config=None):
         from flask import jsonify, request
         import sqlite3
         import bcrypt
+        import traceback
         
-        data = request.get_json()
-        username = data.get('username', '').strip()
-        password = data.get('password', '')
-        
-        if not username or not password:
-            return jsonify({'error': 'Username and password required'}), 400
-        
-        db_path = '/tmp/shopkeep.db'
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        cursor.execute("SELECT id, username, password_hash, role FROM users WHERE username = ?", (username,))
-        row = cursor.fetchone()
-        conn.close()
-        
-        if not row:
+        try:
+            data = request.get_json()
+            print(f"Login attempt: {data}")
+            
+            username = data.get('username', '').strip()
+            password = data.get('password', '')
+            
+            if not username or not password:
+                return jsonify({'error': 'Username and password required'}), 400
+            
+            db_path = '/tmp/shopkeep.db'
+            print(f"Database path: {db_path}")
+            
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, username, password_hash, role FROM users WHERE username = ?", (username,))
+            row = cursor.fetchone()
+            conn.close()
+            
+            if not row:
+                return jsonify({'error': 'Invalid credentials'}), 401
+            
+            if bcrypt.checkpw(password.encode('utf-8'), row[2].encode('utf-8')):
+                from backend.auth.auth_service import AuthService
+                user = {'id': row[0], 'username': row[1], 'role': row[3]}
+                AuthService.login_user(user)
+                return jsonify({'success': True, 'user': user})
+            
             return jsonify({'error': 'Invalid credentials'}), 401
-        
-        if bcrypt.checkpw(password.encode('utf-8'), row[2].encode('utf-8')):
-            from backend.auth.auth_service import AuthService
-            user = {'id': row[0], 'username': row[1], 'role': row[3]}
-            AuthService.login_user(user)
-            return jsonify({'success': True, 'user': user})
-        
-        return jsonify({'error': 'Invalid credentials'}), 401
+            
+        except Exception as e:
+            print(f"Login error: {traceback.format_exc()}")
+            return jsonify({'error': str(e)}), 500
     
     # Static file route LAST
     @app.route('/', defaults={'path': ''})
