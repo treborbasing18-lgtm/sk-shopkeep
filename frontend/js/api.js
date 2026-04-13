@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = '';
 
 class ApiService {
   static async request(endpoint, options = {}) {
@@ -12,7 +12,7 @@ class ApiService {
     return data;
   }
 
-  static checkFirstRun() { return this.request('/auth/check-first-run'); }
+  static checkFirstRun() { return this.request('/auth/setup/status'); }
   static setup(username, password) { return this.request('/auth/setup', {method: 'POST', body: JSON.stringify({username, password})}); }
   static login(username, password) { return this.request('/auth/login', {method: 'POST', body: JSON.stringify({username, password})}); }
   static logout() { return this.request('/auth/logout', {method: 'POST'}); }
