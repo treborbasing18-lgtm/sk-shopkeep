@@ -1,12 +1,34 @@
 const API_BASE = '/api';
 
 class ApiService {
+  static _csrfToken = null;
+
+  static async ensureCsrf() {
+    if (this._csrfToken) return;
+    try {
+      const res = await fetch(`${API_BASE}/auth/csrf-token`, { credentials: 'include' });
+      const data = await res.json();
+      this._csrfToken = data.csrf_token || null;
+    } catch (e) {
+      console.warn('CSRF fetch failed:', e);
+    }
+  }
+
   static async request(endpoint, options = {}) {
+    await this.ensureCsrf();
+
+    const method = (options.method || 'GET').toUpperCase();
+    const headers = { 'Content-Type': 'application/json' };
+    if (this._csrfToken && !['GET','HEAD','OPTIONS'].includes(method)) {
+      headers['X-CSRF-Token'] = this._csrfToken;
+    }
+
     const url = `${API_BASE}${endpoint}`;
     const response = await fetch(url, {
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      ...options
+      headers,
+      ...options,
+      headers: { ...headers, ...(options.headers || {}) }
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Request failed');
