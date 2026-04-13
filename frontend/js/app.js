@@ -135,17 +135,16 @@ class ShopKeepApp {
             const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.error || 'Setup failed');
+                errorEl.textContent = data.error;
+                return;
             }
             
-            auth.user = data.user;
-            auth.isAuthenticated = true;
-            auth.isAdmin = true;
-            
+            // Auto-login after successful setup
+            await auth.login(username, password);
             await this.loadInitialData();
             this.showApp();
         } catch (error) {
-            errorEl.textContent = error.message;
+            errorEl.textContent = 'An error occurred during setup';
         }
     });
 }
@@ -236,7 +235,7 @@ class ShopKeepApp {
         quantity: parseInt(document.getElementById('pqty').value) || 0
       };
       await ApiService.createProduct(data);
-      await this.loadData();
+      await this.loadInitialData();
       modal.remove();
       this.showApp();
     };
