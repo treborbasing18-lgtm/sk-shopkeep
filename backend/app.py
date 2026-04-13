@@ -21,7 +21,10 @@ def create_app(test_config=None):
     
     CORS(app, origins=Config.CORS_ORIGINS, supports_credentials=True)
     
-    # Register blueprints FIRST
+    # INITIALIZE DATABASE FIRST
+    init_database()
+    
+    # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(product_bp)
     app.register_blueprint(sales_bp)
@@ -138,14 +141,21 @@ def create_app(test_config=None):
     return app
 
 def init_database():
-    db_path = Config.DATABASE_PATH
-    schema_path = os.path.join(os.path.dirname(__file__), '..', 'database', 'schema.sql')
+    # Use the correct path for Render
+    import os
+    if os.environ.get('RENDER'):
+        db_path = '/tmp/shopkeep.db'
+        schema_path = os.path.join(os.path.dirname(__file__), '..', 'database', 'schema.sql')
+    else:
+        db_path = Config.DATABASE_PATH
+        schema_path = os.path.join(os.path.dirname(__file__), '..', 'database', 'schema.sql')
     
     db_dir = os.path.dirname(db_path)
     if db_dir and not os.path.exists(db_dir):
         os.makedirs(db_dir, exist_ok=True)
     
     if not os.path.exists(db_path):
+        import sqlite3
         conn = sqlite3.connect(db_path)
         with open(schema_path, 'r') as f:
             conn.executescript(f.read())
