@@ -1,21 +1,25 @@
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui,sans-serif;font-size:14px;background:#f5f5f5;color:#1e1e1e;line-height:1.5}
-.auth-container{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-.auth-box{background:#fff;border-radius:8px;padding:32px;width:100%;max-width:360px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
-.auth-box h2{margin-bottom:8px;color:#BA7517}
-.auth-box input{width:100%;padding:10px;margin-bottom:16px;border:1px solid #d4d4d4;border-radius:6px}
-.auth-box button{width:100%;padding:10px;background:#BA7517;color:#fff;border:none;border-radius:6px;cursor:pointer}
-.app-container{display:flex;min-height:100vh}
-.sidebar{width:240px;background:#fff;border-right:1px solid #e5e5e5;padding:20px 0}
-.main-content{flex:1;padding:24px}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
-.stat-card{background:#fff;padding:20px;border-radius:8px;border:1px solid #e5e5e5}
-.stat-value{font-size:28px;font-weight:600}
-.card{background:#fff;border-radius:8px;border:1px solid #e5e5e5;padding:20px}
-.btn-primary{background:#BA7517;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer}
-.error-message{color:#791F1F;margin-bottom:12px}
-.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center}
-.modal-content{background:#fff;padding:24px;border-radius:8px;width:100%;max-width:480px}
-.form-group{margin-bottom:16px}
-.form-group label{display:block;margin-bottom:6px;font-weight:500}
-.form-group input{width:100%;padding:8px;border:1px solid #d4d4d4;border-radius:6px}
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 50px;
+    background-color: #fff0f5;
+    color: #333;
+}
+
+h1 {
+    font-size: 3rem;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    background-color: #ff69b4;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #ff1493;
+}
