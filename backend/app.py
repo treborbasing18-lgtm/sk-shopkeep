@@ -36,9 +36,13 @@ def create_app(test_config=None):
     
     @app.route('/api/auth/setup/status', methods=['GET'])
     def setup_status():
-        from backend.models.database import db
-        result = db.execute_query("SELECT COUNT(*) as count FROM users WHERE role = 'admin'")
-        has_admin = result and result[0]['count'] > 0
+        import sqlite3
+        db_path = '/tmp/shopkeep.db'
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'admin'")
+        has_admin = cursor.fetchone()[0] > 0
+        conn.close()
         return jsonify({'needs_setup': not has_admin})
     
     @app.route('/api/auth/setup', methods=['POST'])

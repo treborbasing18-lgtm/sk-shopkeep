@@ -1,8 +1,9 @@
-const API_BASE = '';
+const API_BASE = '/api';
 
 class ApiService {
   static async request(endpoint, options = {}) {
-    const response = await fetch(`${API_BASE}${endpoint}`, {
+    const url = `${API_BASE}${endpoint}`;
+    const response = await fetch(url, {
       credentials: 'include',
       headers: {'Content-Type': 'application/json'},
       ...options
