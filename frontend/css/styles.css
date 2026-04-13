@@ -118,6 +118,8 @@ body {
   min-height: 100dvh;
 }
 
+.sidebar { display: none; }
+
 /* Top bar */
 .top-bar {
   position: fixed;
