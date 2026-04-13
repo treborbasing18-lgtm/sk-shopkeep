@@ -80,18 +80,18 @@ class ShopKeepApp {
                 <div id="setup-error" class="error-message"></div>
                 <form id="setup-form">
                     <div class="form-group">
-                        <label>Admin Username</label>
-                        <input type="text" id="username" placeholder="Choose a username" required minlength="3" autocomplete="off">
+                        <label for="setup-username">Admin Username</label>
+                        <input type="text" id="setup-username" placeholder="Choose a username" required minlength="3" autocomplete="off">
                         <small style="color: #666; font-size: 11px;">At least 3 characters</small>
                     </div>
                     <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" id="password" placeholder="Choose a strong password" required minlength="6">
+                        <label for="setup-password">Password</label>
+                        <input type="password" id="setup-password" placeholder="Choose a strong password" required minlength="6">
                         <small style="color: #666; font-size: 11px;">At least 6 characters</small>
                     </div>
                     <div class="form-group">
-                        <label>Confirm Password</label>
-                        <input type="password" id="confirm-password" placeholder="Re-enter your password" required>
+                        <label for="setup-confirm">Confirm Password</label>
+                        <input type="password" id="setup-confirm" placeholder="Re-enter your password" required>
                     </div>
                     <button type="submit" style="width: 100%; margin-top: 16px;">Create Admin Account</button>
                 </form>
@@ -104,9 +104,9 @@ class ShopKeepApp {
     
     document.getElementById('setup-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
-        const confirm = document.getElementById('confirm-password').value;
+        const username = document.getElementById('setup-username').value.trim();
+        const password = document.getElementById('setup-password').value;
+        const confirm  = document.getElementById('setup-confirm').value;
         
         const errorEl = document.getElementById('setup-error');
         
@@ -267,15 +267,15 @@ class ShopKeepApp {
                 <h4 style="margin-bottom: 12px;">Add New User</h4>
                 <form id="add-user-form">
                     <div class="form-group">
-                        <label>Username</label>
+                        <label for="new-username">Username</label>
                         <input type="text" id="new-username" placeholder="Username" required minlength="3">
                     </div>
                     <div class="form-group">
-                        <label>Password</label>
+                        <label for="new-password">Password</label>
                         <input type="password" id="new-password" placeholder="Password" required minlength="6">
                     </div>
                     <div class="form-group">
-                        <label>Role</label>
+                        <label for="new-role">Role</label>
                         <select id="new-role">
                             <option value="staff">Staff</option>
                             <option value="admin">Admin</option>
