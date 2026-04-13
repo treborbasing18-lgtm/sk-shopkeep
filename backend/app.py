@@ -43,27 +43,44 @@ def create_app(test_config=None):
     
     @app.route('/api/auth/setup', methods=['POST'])
     def setup_admin_direct():
-        from flask import request, jsonify
+        from flask import jsonify, request
+        import sqlite3
+        
         data = request.get_json()
         username = data.get('username', '').strip()
         password = data.get('password', '')
         
-        from backend.models.database import db
-        result = db.execute_query("SELECT COUNT(*) as count FROM users WHERE role = 'admin'")
-        if result and result[0]['count'] > 0:
+        if not username or len(username) < 3:
+            return jsonify({'error': 'Username must be at least 3 characters'}), 400
+        if not password or len(password) < 6:
+            return jsonify({'error': 'Password must be at least 6 characters'}), 400
+        
+        # Check if admin exists
+        db_path = '/tmp/shopkeep.db'
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'admin'")
+        if cursor.fetchone()[0] > 0:
+            conn.close()
             return jsonify({'error': 'Admin already exists'}), 403
         
-        try:
-            from backend.models.user_model import UserModel
-            user_id = UserModel.create(username, password, 'admin')
-            user = UserModel.authenticate(username, password)
-            from backend.auth.auth_service import AuthService
-            AuthService.login_user(user)
-            return jsonify({'success': True, 'user': {'id': user['id'], 'username': user['username'], 'role': user['role']}})
-        except ValueError as e:
-            return jsonify({'error': str(e)}), 400
-    
-    init_database()
+        # Create admin
+        import uuid
+        import bcrypt
+        user_id = str(uuid.uuid4())
+        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        
+        cursor.execute(
+            "INSERT INTO users (id, username, password_hash, role, created_at) VALUES (?, ?, ?, ?, datetime('now'))",
+            (user_id, username, password_hash, 'admin')
+        )
+        conn.commit()
+        conn.close()
+        
+        from backend.auth.auth_service import AuthService
+        AuthService.login_user({'id': user_id, 'username': username, 'role': 'admin'})
+        
+        return jsonify({'success': True, 'user': {'id': user_id, 'username': username, 'role': 'admin'}})
     
     # Static file route LAST
     @app.route('/', defaults={'path': ''})
